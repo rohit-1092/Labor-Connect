@@ -1,58 +1,65 @@
+import 'dotenv/config';
 import express from "express";
 import dotenv from "dotenv";
 import http from "http";
 import bodyParser from "body-parser";
 import cors from "cors";
 import morganBody from "morgan-body";
+import passport from "passport";
+import "./utils/passport.js";  // Add this line
 import routes from "./routes/index.js";
-import middlewares from "./middlewares/index.js";
+import { errorHandler } from "./middlewares/errorHandler.js";
 import dbConnect from "./utils/db.js";
-import path from 'path';
-
+import path from "path";
 
 dotenv.config();
 
-
 const app = express();
+const PORT = process.env.PORT || 3001;
+const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
+
 app.server = http.createServer(app);
 
-const { errorHandler } = middlewares.errorHandler;
 
-// middleware
-app.use(cors());
+// Middleware
+// Middleware
+app.use(cors({
+    origin: 'http://localhost:3000', // Your React app's URL
+    credentials: true
+  }));
+app.use(bodyParser.json({ limit: process.env.BODY_LIMIT || "100kb" }));
+app.use(express.json());
+app.use(passport.initialize());  // Add this line
 
-
-app.use(
-    bodyParser.json({
-        limit: process.env.BODY_LIMIT,
-    })
-);
-
-// hook morganBody to express app
-if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === "development") {
     morganBody(app);
 }
 
-//connecting db
-dbConnect();
+// Connect to MongoDB
+(async () => {
+    try {
+        await dbConnect();
+    } catch (error) {
+        console.error("❌ Database connection error:", error);
+        process.exit(1);
+    }
+})();
 
+// API Routes
+app.use("/api", routes);
 
+console.log("✅ API Routes mounted at /api");
 
-// api routes to /api
-app.use('/api', routes);
-
-if (process.env.NODE_ENV === 'production') {
-    //*Set static folder up in production
-    app.use(express.static('client/build'));
-    app.get('*', (req, res) => res.sendFile(path.resolve('client', 'build', 'index.html')));
+if (process.env.NODE_ENV === "production") {
+    const clientPath = path.resolve("client", "build");
+    app.use(express.static(clientPath));
+    app.get("*", (req, res) => res.sendFile(path.join(clientPath, "index.html")));
 }
 
-// global error handler function
 app.use(errorHandler);
-app.server.listen(process.env.PORT);
 
-console.log(`Started on ${process.env.BASE_URL}`);
-
-
+app.server.listen(PORT, () => {
+    console.log(`🚀 Server started on ${BASE_URL}`);
+});
 
 export default app;

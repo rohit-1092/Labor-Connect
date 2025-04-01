@@ -1,11 +1,12 @@
 import mongoose from "mongoose";
 
 import "../models/gig.js";
-import "../models/user.js";
+import "../models/User.js";
 import "../models/LaborsType.js";
 
 const Gig = mongoose.model("gigs");
-const User = mongoose.model("users");
+import User from "../models/User.js";
+
 const LaborsType = mongoose.model("LaborsType");
 import { Capitalize } from "./laborsType.js";
 import { AddNewLaborType } from "./user.js";

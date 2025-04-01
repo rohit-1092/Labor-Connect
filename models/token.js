@@ -1,20 +1,15 @@
 import mongoose from "mongoose";
 
-const tokenSchema = new mongoose.Schema({
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: true,
-    ref: "users",
-    unique: true
+mongoose.set("strictQuery", false);
+
+const tokenSchema = new mongoose.Schema(
+  {
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
+    token: { type: String },
   },
-  token: {
-    type: String,
-    required: true
-  },
-createdAt: {
-    type: Date,
-    default: Date.now,
-    expires: 3600
-}
-});
-mongoose.model("token", tokenSchema);
+  { timestamps: true }
+);
+
+const Token = mongoose.models.tokens || mongoose.model("tokens", tokenSchema);
+
+export default Token;

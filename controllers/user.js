@@ -1,29 +1,15 @@
 import _ from "lodash";
 import mongoose from "mongoose";
+import { User, Token, LaborsType, Message, Conversation, Project, Gig } from "../models/index.js";
 import passport from "passport";
 import role from "../utils/role.js";
 import crypto from "crypto";
-
-import "../models/user.js";
-import "../utils/passport.js";
-import "../models/token.js";
-import "../models/LaborsType.js";
-import "../models/conversation.js"
-import "../models/message.js"
-import "../models/project.js"
-import "../models/gig.js"
 import { sendEmail } from "../utils/EmailSender.js";
 import { Capitalize, CapitalizeAll } from "./laborsType.js";
 
 const { includes, keys, size } = _;
 
-const User = mongoose.model("users");
-const Token = mongoose.model("token");
-const LaborsType = mongoose.model("LaborsType");
-const Message = mongoose.model("messages");
-const Conversation = mongoose.model("conversations");
-const Project = mongoose.model("projects");
-const Gig = mongoose.model("gigs");
+
 
 export default {
   login(req, res, next) {
@@ -57,14 +43,21 @@ export default {
       }
     })(req, res, next);
   },
+  
   signup(req, res, next) {
+    console.log("Incoming user data:", req.body);
+    console.log("Extracted user data:", req.body.user);
+
+
     if (!req.body.user) {
       return res.sendStatus(400);
     }
     let check = check_signup_requiredFields(req.body.user);
-    if (check !== "") {
-      return res.status(400).json({ error: check });
-    }
+if (check) {
+  return res.status(400).json({ error: check });
+}
+
+
 
     // check if password is 8 character long and have at least one number and one alphabet and one special character and one uppercase
     if (!req.body.user.password.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$\-!%*?&])[A-Za-z\d@\-$!%*?&]{8}$/)) {
@@ -73,8 +66,22 @@ export default {
         msg: "Password must be at lease 8 characters, one uppercase, one digit, one alphabet and one special character"
       });
     }
-    let user = new User();
-    Object.assign(user, req.body.user);
+    if (!req.body.user.username || !req.body.user.role) {
+      return res.status(400).json({ error: "Username and role are required" });
+    }
+    
+    if (!req.body.user.username || !req.body.user.role) {
+      return res.status(400).json({ error: "Username and role are required" });
+    }
+    
+    let user = new User({
+      username: req.body.user.username,
+      email: req.body.user.email,
+      role: req.body.user.role,
+      password: req.body.user.password
+    });
+    
+    
     if (user.role === "LABOR") Object.assign(user, { rating: 90, startingWage: 1000 });
     if (user.role !== "ADMIN") {
       Object.assign(user, { status: "unverified", profileCompleted: false });
@@ -298,22 +305,16 @@ export default {
 };
 
 const check_signup_requiredFields = (user) => {
-  if (!user.username) {
-    return { username: "can't be blank" };
-  }
-  if (!user.email) {
-    return { email: "can't be blank" };
-  }
-  if (!user.password) {
-    return { password: "can't be blank" };
-  }
-  if (!user.role) {
-    return { role: "can't be blank" };
-  } else if (!includes(role, user.role)) {
-    return { role: "is not supported yet" };
-  }
-  return "";
+  let errors = {};
+  if (!user.username) errors.username = "Username can't be blank";
+  if (!user.email) errors.email = "Email can't be blank";
+  if (!user.password) errors.password = "Password can't be blank";
+  if (!user.role) errors.role = "Role can't be blank";
+  else if (!includes(role, user.role)) errors.role = "Role is not supported";
+
+  return Object.keys(errors).length > 0 ? errors : null;
 };
+
 
 const check_login_requiredFields = (user) => {
   if (!user.username) {

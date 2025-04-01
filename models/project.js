@@ -3,16 +3,17 @@ import mongoose from "mongoose";
 mongoose.set("strictQuery", false);
 
 const projectSchema = new mongoose.Schema(
-    {
-        gig: { type: mongoose.Schema.Types.ObjectId, ref: "gigs" },
-        description: { type: String, required: [true, "can't be blank"] },
-        price: { type: Number, required: [true, "can't be blank"] },
-        deliveryTime: { type: Number, required: [true, "can't be blank"] },
-        customer: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
-        seller: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
-        status: { type: String, default: "OFFERED" }
-    },
-    { timestamps: true }
+  {
+    title: { type: String },
+    description: { type: String },
+    budget: { type: Number },
+    status: { type: String },
+    client: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
+    labor: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
+  },
+  { timestamps: true }
 );
 
-mongoose.model("projects", projectSchema);
+const Project = mongoose.models.projects || mongoose.model("projects", projectSchema);
+
+export default Project;

@@ -1,10 +1,9 @@
 import mongoose from "mongoose";
 import _ from "lodash";
-import "../models/LaborsType.js";
+import { LaborsType } from "../models/index.js";
 
 const { map } = _;
 
-const LaborsType = mongoose.model("LaborsType");
 
 
 export default {
@@ -12,8 +11,8 @@ export default {
     LaborsType.find().then((laborsType) => {
       return res.json(map(laborsType, (type) => CapitalizeAll(type.name)));
     }).catch(next);
-  }
-  , add(req, res, next) { //add new laborsType
+  },
+  add(req, res, next) { //add new laborsType
     let type = req.body.name;
     if (!type) {
       return res.status(400).json("must provide type in this format: {name:'type'}");
@@ -46,10 +45,8 @@ export default {
 
 export const Capitalize = (str) => {
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-}
+};
 
 export const CapitalizeAll = (str) => {
-  return str.split(" ") // split by spaces
-    .map(Capitalize) // capitalize each word
-    .join(" "); // join by spaces
-}
+  return str.split(" ").map(Capitalize).join(" ");
+};

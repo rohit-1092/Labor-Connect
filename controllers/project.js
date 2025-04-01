@@ -4,7 +4,8 @@ import "../models/user.js";
 import "../models/gig.js";
 import "../models/project.js";
 
-const User = mongoose.model("users");
+import User from "../models/User.js";
+
 const Gig = mongoose.model("gigs");
 const Project = mongoose.model("projects");
 

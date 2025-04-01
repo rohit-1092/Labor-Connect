@@ -30,14 +30,17 @@ const Signup = () => {
     formObject.email = popup.message.email;
     formObject.role = popup.message.role;
 
-    axios.request({
-      baseURL: apiURL,
-      url: signupURL,
-      method: "post",
+    const signupData = {
+      username,
+      email: popup.message.email,
+      password,
+      role: popup.message.role || 'CUSTOMER' // Default to CUSTOMER if role not specified
+    };
+
+    axios.post(`${apiURL}/${signupURL}`, signupData, {
       headers: {
         "Content-Type": "application/json"
-      },
-      data: { user: formObject }
+      }
     }).then((res) => {
       setMsg({ msg: "", type: "success" });
       dispatch(updatePopup({
@@ -50,9 +53,12 @@ const Signup = () => {
       }));
     }).catch((err) => {
       console.log(err);
-      if (err.response && err.response.data && err.response.data.type) {
-        if (err.response.data.type === "username") setMsg({ msg: "Username already taken", type: "error-u" });
-        else if (err.response.data.type === "password") setMsg({ msg: err.response.data.msg, type: "error-p" });
+      if (err.response && err.response.data) {
+        if (err.response.data.message === "User already exists") {
+          setMsg({ msg: "Username or email already taken", type: "error-u" });
+        } else {
+          setMsg({ msg: err.response.data.error || "Something went wrong", type: "error-p" });
+        }
       } else {
         setMsg({
           msg: "Did your internet connection fail? If it's not you, it's us. Please try again later.",

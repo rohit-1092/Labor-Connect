@@ -6,25 +6,17 @@ import conversation from "./conversation.js";
 import message from "./message.js";
 import project from "./project.js";
 
-const { Router } = express;
-const api = Router();
+const router = express.Router();
 
-// user apis
-api.use("/users", user);
+router.get("/", (req, res) => {
+    res.json({ message: "✅ API is working!" });
+});
 
-//LaborsType apis
-api.use("/laborsType", laborsType);
+router.use("/user", user);  // Changed from /users to /user to match your routes
+router.use("/laborsType", laborsType);
+router.use("/gigs", gig);
+router.use("/conversations", conversation);
+router.use("/messages", message);
+router.use("/projects", project);
 
-//gig apis
-api.use("/gigs", gig);
-
-//conversation apis
-api.use("/conversations", conversation);
-
-//message apis
-api.use("/messages", message);
-
-//project apis
-api.use("/projects", project);
-
-export default api;
+export default router;

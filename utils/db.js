@@ -1,34 +1,40 @@
 import mongoose from "mongoose";
+import dotenv from "dotenv";
 
-const dbConnect=()=>{
-    const DB_URL = process.env.MONGO_URL;
-    const connectionParams = {
-        useNewUrlParser: true,
-        useUnifiedTopology: true
+dotenv.config(); // Load environment variables
+
+const DB_URL = process.env.MONGO_URL;
+
+const dbConnect = async () => {
+    if (!DB_URL) {
+        console.error("❌ MONGO_URL is missing from .env file");
+        process.exit(1);
     }
-    mongoose.connect(DB_URL, connectionParams,{server: {auto_reconnect: true}})
-        .then(
-            () => {
-                console.log('Database connected successfully');
-            },
-            err => {
-                console.log('ERROR!!! While connecting to the database');
-                console.log(err);
-            }
-        )
-        .catch((err) => {
-            console.error(`Error connecting to the database. n${err}`);
-        })
-    mongoose.set('debug', true);
-    mongoose.connection.on('disconnected', () => {
-        console.log('Database loss connection');
-    });
-    mongoose.connection.on('reconnect', () => {
-        console.log('Database reconnected');
-    });
-    mongoose.connection.on('reconnectFailed', () => {
-        console.log('Failed to reconnect database');
-    });
-}
-export default dbConnect;
 
+    try {
+        await mongoose.connect(DB_URL, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true
+        });
+
+        console.log("✅ Database connected successfully");
+
+        mongoose.connection.on("disconnected", () => {
+            console.error("⚠️ Database lost connection");
+        });
+
+        mongoose.connection.on("reconnected", () => {
+            console.log("🔄 Database reconnected");
+        });
+
+        mongoose.connection.on("error", (err) => {
+            console.error("❌ Database error:", err);
+        });
+
+    } catch (error) {
+        console.error("❌ Database connection failed:", error.message);
+        process.exit(1); // Exit process if connection fails
+    }
+};
+
+export default dbConnect;

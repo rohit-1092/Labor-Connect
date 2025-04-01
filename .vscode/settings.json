@@ -2,5 +2,6 @@
     "cSpell.words": [
         "clientinstall",
         "postbuild"
-    ]
+    ],
+    "liveServer.settings.port": 5501
 }

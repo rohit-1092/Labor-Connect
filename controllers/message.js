@@ -1,10 +1,11 @@
 import mongoose from "mongoose";
 
-import "../models/user.js";
+import "../models/User.js";
 import "../models/message.js";
 import "../models/conversation.js";
 
-const User = mongoose.model("users");
+import User from "../models/User.js";
+
 const Message = mongoose.model("messages");
 const Conversation = mongoose.model("conversations");
 
